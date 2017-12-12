@@ -1,0 +1,37 @@
+mysql tables:
+
+
+
+
+squadron table   
+
+ CREATE TABLE squadron_tbl(  
+       sq_id INT NOT NULL AUTO_INCREMENT,  
+       sq_name VARCHAR(100) NOT NULL,  
+       sq_phone VARCHAR(10) NOT NULL,
+       sq_type INT NOT NULL,  
+       PRIMARY KEY ( sq_id )  
+    );  
+
+
+Insert Command :     INSERT INTO squadron_tbl (sq_name,sq_phone,sq_type) VALUES ('xyz', '8989235456', 1);
+INSERT INTO squadron_tbl(sq_name,sq_phone,sq_type) VALUES ('abc', '8989235456', 4);  
+INSERT INTO squadron_tbl(sq_name,sq_phone,sq_type) VALUES ('jnj', '8981273456', 1);  
+INSERT INTO squadron_tbl(sq_name,sq_phone,sq_type) VALUES ('swe', '8983876456', 4);    
+
+
+CREATE TABLE report_meta(  
+       r_id INT NOT NULL AUTO_INCREMENT,  
+       r_freq INT NOT NULL,
+       r_stop_flag VARCHAR(10),  
+       PRIMARY KEY ( r_id )  
+    );  
+
+
+ INSERT INTO report_meta (r_freq,r_stop_flag)VALUES (5000,'START');  
+
+
+CREATE TABLE report_tbl(  
+       r_id_type INT NOT NULL ,  
+       r_data VARCHAR(1000) 
+    );  
