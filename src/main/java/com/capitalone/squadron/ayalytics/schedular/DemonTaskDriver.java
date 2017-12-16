@@ -1,12 +1,7 @@
 package com.capitalone.squadron.ayalytics.schedular;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
-import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Map.Entry;
 
 import com.capitalone.squadron.ayalytics.beans.Table1POJO;
 import com.capitalone.squadron.ayalytics.constants.GetObjects;
@@ -21,6 +16,7 @@ public class DemonTaskDriver extends TimerTask {
 	public Object[] task = null;
 	int counter = 0;
 	int updatedCount = 0;
+	boolean flag = false;
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -38,34 +34,68 @@ public class DemonTaskDriver extends TimerTask {
 			}
 
 			else {
+				System.out.println("Main schedular called");
 				/* Initialize periodic updated metadata map */
 				updatedMetadataMapReport1 = (List<Table1POJO>) GetObjects.suadronReportService
-						.prepareReportData(SQLConstants.select_report_metadata);
+						.getReportMetadaInfo(SQLConstants.select_report_metadata);
 			}
 
 			if (SchedularConstants.schedularack.equals("STARTED")) {
 
-				for(int i=0; i<=updatedMetadataMapReport1.size(); i++)
-				{
-					if(initialMetadataMapReport1.get(i).getFrequency() != updatedMetadataMapReport1.get(i).getFrequency())
-					{
-						
-					}
-					else if(updatedMetadataMapReport1.get(i).getStopFlag().equals("TRUE"))
-					{
+				for (int i = 0; i < updatedMetadataMapReport1.size(); i++) {
+					System.out.println(initialMetadataMapReport1.get(i)
+							.getFrequency());
+					System.out.println(updatedMetadataMapReport1.get(i)
+							.getFrequency());
+
+					if (!initialMetadataMapReport1
+							.get(i)
+							.getFrequency()
+							.equals(updatedMetadataMapReport1.get(i)
+									.getFrequency())) {
+						System.out.println("Cancelling the task");
+						System.out.println("launching with new frequency");
 						TimerTask t = (TimerTask) task[i];
 						t.cancel();
+
+						if (updatedMetadataMapReport1.get(i).getStopFlag()
+								.equals("FALSE")) {
+							task[i] = (Object) Class.forName(
+									GetObjects.miscUtil.getProperties(String
+											.valueOf(updatedMetadataMapReport1
+													.get(i).getReportID())))
+									.newInstance();
+
+							GetObjects.timer.schedule((TimerTask) task[i], 100,
+									(Integer) updatedMetadataMapReport1.get(i)
+											.getFrequency());
+						}
+
 					}
+					if (updatedMetadataMapReport1.get(i).getStopFlag()
+							.equals("TRUE")) {
+						TimerTask t = (TimerTask) task[i];
+						t.cancel();
+						flag = true;
+					}
+
+					if (updatedMetadataMapReport1.get(i).getStopFlag()
+							.equals("FALSE")) {
+						if (flag == true) {
+							task[i] = (Object) Class.forName(
+									GetObjects.miscUtil.getProperties(String
+											.valueOf(updatedMetadataMapReport1
+													.get(i).getReportID())))
+									.newInstance();
+							GetObjects.timer.schedule((TimerTask) task[i], 100,
+									(Integer) updatedMetadataMapReport1.get(i)
+											.getFrequency());
+						}
+
+					}
+
 				}
 				initialMetadataMapReport1 = updatedMetadataMapReport1;
-				/*
-				 * compare initial map and periodic map for any change in
-				 * frequency
-				 */
-				/*
-				 * if change in frequency found then cancel the running task and
-				 * re launch with new frequency* else do nothing
-				 */
 
 			} else {
 
@@ -83,7 +113,7 @@ public class DemonTaskDriver extends TimerTask {
 
 					} else {
 						System.out.println("Report task not started");
-						
+
 					}
 					counter++;
 				}
